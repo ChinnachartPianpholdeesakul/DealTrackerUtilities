@@ -1,0 +1,22 @@
+Development Product Family: SSL
+EDS Category::  Triarch Open Systems
+Product: SDK - Classic Edition
+Release: 4.0.10
+Load Number: 1
+Load ID: ssl4.0.10.L1.devkit.win32.rri
+Status: RRI
+Operating System: Win 32
+OS Versions: NT 4.0; Win 95; Win 98; Windows 2000
+Verified Hardware: Pentium; Pentium Pro; Pentium II; Pentium III
+Platform Notes / Restrictions: 
+Template version(s) supported (if applicable): V2.04
+Interproduct dependencies: 
+Reuter Part Number: 35-15-2376
+US ECCN: EAR99
+EU ECCN: None
+EXPORT CODE: NL
+Country of Origin: USA
+Supercedes: N/A
+
+Authorized for Release by: Arjun Nagar
+Date approved for Release: 05/15/2002

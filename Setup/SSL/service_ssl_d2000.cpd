@@ -1,0 +1,606 @@
+
+	 *******************************************************************
+	 *                  Copyright (C) 1995 Reuters,                    *
+	 *                                                                 *
+	 *   All rights reserved. Duplication or distribution prohibited   *
+	 *******************************************************************
+	
+        OVERVIEW/ FILE CONTENTS
+
+    The Configuration Parameter Definition (.cpd) file contains
+    a description of a Triarch component configuration parameters 
+    along with the keyword syntax for each parameter, and the 
+    encoded configuration specification string used by the Triarch 
+    configuration utilities.
+
+    The .cpd file serves two roles:
+
+    It is a complete description of all available configuration variables 
+    for a each component. The TRIARCH installer must read this file to 
+    find out what effect a parameter has on the component/system.
+
+    It is the input to the Triarch Configuration utilities, which use
+    the encoded information to manage the complexity in configuring the
+    component.  For example, if a "basic" configuration is performed on
+    a component, the utilities will only show the installer parameters
+    that have been defined as Basic.
+
+	After the description of each parameter a line is inserted containing a
+    control string and the actual parameter definition.
+
+    @ @ @ @ @ @  *sink_dist*keepAlive*keepAliveTimeout : 300
+
+    The control string is made up of six fields delimited by @.    
+
+    @class@scope@type@restriction@default@comment@  
+
+    An example is:
+
+    @B@SN@N@N@@AUTOMATICALLY ASSIGNED@ "${node}"*sink_dist*keepAlive*keepAliveId : XX
+
+    Note: ${node}, ${inst}, and ${svc} are used as placeholders for node name, 
+    instance, and service name, respectivelly.
+
+
+
+    THE FOLLOWING TABLE DEFINES THE POSSIBLE ENCONDING FOR EACH CONTROL FIELD.
+    
+    
+    field          Values             Description
+    ------------|------------|----------------------------------------------------
+    class       |    B       | Basic - available for basic install menu
+                |    A       | Advanced - available only in advanced menu
+                |    D       | Debug - available only via debug menu
+                |    R       | Read-only  passed to triarch.cnf unmodified
+    ------------|------------|----------------------------------------------------
+    scope       |   G        | Global - global Triarch parameter, cannot be 
+                |            | applied to a specific node.    
+                |   MN       | Modifiable to Node - normally a global parameter, 
+                |            | may be redefined to a specific node.
+                |   MI       | Modifiable to Instance- normally a global parameter,
+                |            | may be redefined to a specific instance.
+                |   SN       | Specific to Node - must always be scoped to a node.
+                |   SI       | Specific to Instance - must always be scoped to an 
+                |            | instance.
+    ------------|------------|----------------------------------------------------
+    type        |   N        | Numeric - parameter is of type numeric. Used in 
+                |            | validation  
+                |   S        | String - parameter is of type string. Used in 
+                |            | validation.
+    ------------|------------|----------------------------------------------------
+    restriction |   N        | None
+                |   Rn,m     | Range - numeric range of values
+                |   Lx,y,z   | List - An list of string values
+    ------------------------------------------------------------------------------
+    default     |            | default value assigned by development.
+    ------------------------------------------------------------------------------
+    comment     |            | comment - parameter description.
+    ------------------------------------------------------------------------------
+
+
+    This file contains a description of the common source SERVICE configutarion
+    parameters along with the keyword syntax for each parameter. TRIARCH server 
+    developers are expected to use this file as a template for the creation of the
+    service specific configuration parameter definition file.  This file is not 
+    directly usable to configure a TRIARCH service, as supplied in the SSL developers
+    kit.  It can be used to defined a service but the user must be prepared to make
+    suitable choices for most configuration variables.
+
+    For example, in-house developments  of TRIARCH servers, ISFS and TDPF, used
+    the contents of this file as the basis for their service specific files supplied
+    with the servers, service_isfs.cpd and service_tdpf.cpd.  These files have been
+    encoded with suitable defaults for each SERVICE, to minimize data entry during
+    configuration.
+
+
+ FORMAT AND SYNTAX NOTES:
+
+
+
+    A list of values enclosed in curly braces '{}' indicates that one
+    and only one of the values may be specified for the given parameter.
+
+    A value enclosed in square braces '[]' is optional.
+
+    General keyword syntax:
+
+    The keyword format follows the X config format and is as follows:
+
+        <hostname>.<instance>.<serviceName>*<config_variable> : <value>
+
+    The hostname, instance, and serviceName fields are tightly bound (i.e.,
+    additional fields may NOT be inserted between these fields). Hence,
+    these fields are delimitted with a '.'. On the other hand, the
+    serviceName and config_variable fields are loosely bound (i.e.,
+    additional fields may be inserted between these fields). Hence, these
+    fields are delimitted with a '*'. The hostname and/or instance fields may
+    be replaced with a wild card value '*'. Hence, the following keyword
+    formats are possible:
+
+        <hostname>*<serviceName>*<config_variable> : <value>
+        *<instance>.<serviceName>*<config_variable> : <value>
+        *<serviceName>*<config_variable> : <value>
+
+    Note: If a parameter is applicable to the service as a whole, the
+    following format should be chosen:
+
+        *<serviceName>*<config_variable> : <value>
+
+
+
+    *******************************************************************************
+                  Common Source Service parameters
+    *******************************************************************************
+
+     serviceId:  { 32 - 65535 }
+     Use the 'AllocateIds' tool to assign a unique ID.
+     Note: A given serviceId may not share its value with any other serviceId,
+     serverId, or keepAliveId on the network. Values 0 - 31 inclusive are
+     reserved and may not be used.
+     Default value: NONE - THIS PARAMETER MUST BE DEFINED
+    
+    *<serviceName>*serviceId: XX
+    
+@B@G@N@N@@AUTOMATICALLY ASSIGNED@	*"${svc}"*serviceId: XX
+    
+     Assignment of "serverId's" to source servers:  { 32 - 65535 }
+     Use the 'AllocateIds' tool to assign a unique serverId to each source
+     server. Note: A given serverId may not share its value with any other
+     serviceId, serverId, or keepAliveId on the network. Values 0 - 31 inclusive
+     are reserved and may not be used.
+     Three alternative keyword formats are presented below. Use the one(s) most
+     suitable for your site.
+     Default value: NONE - THIS PARAMETER MUST BE DEFINED
+    
+     IMPORTANT: If the source application is remote from the src_dist, the
+     hostname specified in the keyword must be the hostname of the source
+     application not the src_dist.
+     NOTE: In version ssl4.0.F11, the source application must be run on the
+           same machine as the src_dist.
+    
+    <hostname>*<serviceName>*serverId : XX
+    <hostname>.<instance>.<serviceName>*serverId : XX
+    *<instance>.<serviceName>*serverId : XX
+    
+@B@SN@N@N@@AUTOMATICALLY ASSIGNED@	"${node}"*"${svc}"*serverId : XX
+    
+     cacheType:  { sinkDriven, sourceDriven }
+     One of two values MUST be specified:
+     sinkDriven   - The cache content is determined by sink/network demand.
+                    A sink-driven server is allowed to add an item to its
+                    cache only upon the reception of an Open request.
+                    This type of server functions as an interactive datafeed
+                    handler and was formerly called a "Selective Cache" server.
+     sourceDriven - The cache content is determined solely by the source
+                    application/ datafeed. Network demand has no bearing on
+                    the contents of the cache. A source-driven server is
+                    allowed to add an item to its cache at any time.
+                    This type of server functions as a broadcast datafeed
+                    handler and was formerly called a "Full Cache" server.
+     Default value: NONE - THIS PARAMETER MUST BE DEFINED
+    
+    *<serviceName>*cacheType: {sinkDriven, sourceDriven}
+@B@G@S@LsinkDriven,sourceDriven@@CACHE TYPE@	*"${svc}"*cacheType: sinkDriven
+    
+    
+     cacheLocation:  { ssl, srcApp }
+     One of two values MUST be specified:
+     ssl    - The data cache will be maintained in the src_dist.
+     srcApp - The data cache will be maintained in the source application.
+              Caching will be disabled in the src_dist in this case.
+     Default value: NONE - THIS PARAMETER MUST BE DEFINED
+    
+    *<serviceName>*cacheLocation: {ssl, srcApp}
+    
+@B@G@S@Lssl,srcApp@@CACHE TYPE@	*"${svc}"*cacheLocation: ssl
+    
+     dataType:  { 1 - N }
+     Indicates the format of the data provided by the service.
+     If the 'cacheLocation' is set to 'ssl', one of the following values
+     MUST be specified:
+         1 - standard ANSI Page format
+         2 - standard Marketfeed Record format
+     If the 'cacheLocation' is set to 'srcApp', one of the above values may
+     be specified for this parameter. However, if the service provides some
+     other type of data, it may define its own unique value for this parameter.
+     Default value: NONE - THIS PARAMETER MUST BE DEFINED
+    
+    *<serviceName>*dataType: XX
+    
+@B@G@N@R1,1024@@DT 1:Page, 2:Record, N: user defined@	*"${svc}"*dataType: 2
+    
+     preemption:  { ssl, srcApp }
+     This parameter is applicable only if 'cacheType' is 'sinkDriven'.
+     One of two values MUST be specified in this case:
+     ssl    - Preemption will be performed by the SSL infrastructure.
+     srcApp - Preemption will be performed by the source application.
+              Preemption will be disabled in the SSL infrastructure in this case.
+     Default value: NONE - THIS PARAMETER MUST BE DEFINED
+    
+    *<serviceName>*preemption: {ssl, srcApp}
+    
+@B@G@S@Lssl,srcApp@@WHO DOES PREEMPTION@	*"${svc}"*preemption: ssl
+    
+     blockedItemsFile:
+     This is an optional parameter.
+     If this parameter is defined, it must specify the path name (full or
+     relative) of a 'blocked items' file. This file must contain one item name
+     per line. All users on the system will be unable to open any item specified
+     in this file. If this parameter is not defined, normal open processing
+     will be performed.
+     Default value: none
+    
+     Note: It is recommended that this file name incorporate the service name
+           so as to avoid accidentally sharing the same file name used by another
+           service.
+    
+    *<serviceName>*blockedItemsFile: XX
+    
+@A@G@S@N@@BLOCKED ITEM FILE NAME@	*"${svc}"*blockedItemsFile: ./blockeditems_file
+    
+     itemPriorityFile:
+     This is an optional parameter.
+     If this parameter is defined, it must specify the path name (full or
+     relative) of an 'item priority' file. This file must contain one item entry
+     per line having the following format:
+         item_name  priority_class
+     where the item_name and priority_class are separated by a blank space.
+     With respect to a user request:
+     1) If the requested item is specified in the 'itemPriorityFile', the
+        Sink Open priority class will be set to the priority class assigned to
+        this item by this file.
+     2) If the requested item is NOT specified in the 'itemPriorityFile':
+        a) If the user request contains the default priority (class 1, count 1)
+           and a 'defaultPriorityClass' is defined for this user/service
+           combination (this parameter is specified in the triarch.config.user
+           file), the Sink Open priority class will be set to the
+           'defaultPriorityClass' value.
+        b) Otherwise, the Sink Open priority class will be set to the priority
+           class provided in the user request with the following exceptions:
+           i)  If a 'maxPriorityClass' is defined for this user/service
+               combination (this parameter is specified in the triarch.config.user
+               file), and the priority class provided in the user request exceeds
+               this value, the Sink Open priority class will be set to the
+               'maxPriorityClass' value.
+           ii) If a 'maxPriorityClass' is NOT defined for the given user/service
+               combination and the priority class provided in the user request is
+               equal to or greater than the 'lockedItemThreshold' for the service,
+               the Sink Open priority class will be set to the value
+               (lockedItemThreshold - 1).
+     Default values: none
+    
+     Note: If defined, the 'defaultPriorityClass' and 'maxPriorityClass'
+           parameters must be set to a value less than the 'lockedItemThreshold'
+           defined for the service.
+           If defined, it is recommended that the 'itemPriorityFile' name
+           incorporate the service name so as to avoid accidentally sharing the
+           same file name used by another service.
+    
+    *<serviceName>*itemPriorityFile: XX
+    
+@A@G@S@N@@ITEM PRIORITY FILE NAME@	*"${svc}"*itemPriorityFile:  ./priority_file
+    
+     forwardItemPriorityToSrcApp: { True, False }
+     This parameter indicates whether an item's priority should be forwarded
+     to the source application. If this parameter is set to 'True', the source
+     application will receive the network priority of an item (1) in the
+     SSL_MT_REQ_IMAGE message, and (2) in the SSL_MT_PRIORITY message whenever
+     the priority of an item changes.
+     Default value: False
+    
+    *<serviceName>*forwardItemPriorityToSrcApp: {True, False}
+    
+@A@G@S@LTrue,False@False@SEND PRIORITY TO SOURCE APPL.@	*"${svc}"*forwardItemPriorityToSrcApp: False
+    
+     supportsOutofBandSnapshots: { True, False }
+     This parameter is applicable only if 'cacheType' is 'sinkDriven'.
+     A service which claims to support out-of-band snapshots must be able to
+     provide an image for an un-cached item when its cache is full without
+     preempting an existing item. Furthermore, the service must not supply
+     updates for this item following the image.
+     Default value: False
+    
+    *<serviceName>*supportsOutofBandSnapshots: {True, False}
+    
+@A@G@S@LTrue,False@False@SERVICE SUPPORTS OOB SNAPSHOT REQ.@	*"${svc}"*supportsOutofBandSnapshots: False
+    
+     providesSequenceNumbers: { True, False }
+     Indicates whether the service provides reliable sequence numbers in its
+     data streams. If a service provides reliable sequence numbers, these
+     sequence numbers are used by the SSL infrastructure to ensure that sink
+     applications do not receive duplicate updates during fail-over to a
+     hot-standby source server.
+     Default value: False
+    
+    *<serviceName>*providesSequenceNumbers: {True, False}
+    
+@A@G@S@LTrue,False@False@SERVICE PROVIDES SEQUENCE @	*"${svc}"*providesSequenceNumbers: False
+    
+     normalRetryTime:  { 1 - N  seconds }
+     If an item can not be obtained from any available server, the SSL
+     infrastructure will attempt to re-open the item after this amount
+     of time (in seconds) has elapsed.
+     Default value: 120
+    
+    *<serviceName>*normalRetryTime: 120
+    
+@A@G@N@N@120@REQUEST RETRY TIME@	*"${svc}"*normalRetryTime: 120
+    
+     removeUnwatchedItemThreshold:  { 0 - 11 }
+     This parameter is applicable only if 'cacheType' is 'sinkDriven'.
+     If an item is closed and its priority class is less than this value,
+     the item will be removed from cache. Otherwise, the unwatched item
+     will remain in cache.
+     Default value: 0
+    
+    *<serviceName>*removeUnwatchedItemThreshold: 0
+    
+@A@G@N@R0,11@0@REMOVE UNWATCHED ITEM THRESHOLD@	*"${svc}"*removeUnwatchedItemThreshold: 0
+    
+     lockedItemThreshold:  { 0 - 11 }
+     This parameter is applicable only if 'cacheType' is 'sinkDriven'.
+     When an item is closed:
+     a) If its priority class is less than this value but greater than or
+        equal to the 'removeUnwatchedItemThreshold', its priority class will
+        be set to zero.
+     b) If its priority class is greater than or equal to this value, its
+        priority class will remain unchanged.
+     Default value: 5
+    
+     Note: This value must be greater than or equal to the
+           'removeUnwatchedItemThreshold'.
+    
+    *<serviceName>*lockedItemThreshold: 5
+    
+@A@G@N@R0,11@5@LOCKED ITEM THRESHOLD@	*"${svc}"*lockedItemThreshold: 5
+    
+     preemptionRecoveryThreshold:  { 0 - 11 }
+     This parameter is applicable only if 'cacheType' is 'sinkDriven'.
+     When an item is preempted:
+     a) If its priority class is greater than or equal to this value, the item
+        will be automatically recovered by the SSL infrastructure after the
+        'preemptionRetryTime' (in seconds) has elapsed.
+     b) If the item's priority class is less than this value, it will not be
+        recovered by the SSL infrastructure.
+     Default value: 0
+    
+    *<serviceName>*preemptionRecoveryThreshold: 0
+    
+@A@G@N@R0,11@0@PREEMPTION RECOVERY THRESHOLD@	*"${svc}"*preemptionRecoveryThreshold: 0
+    
+     preemptionRetryTime:  { 1 - N  seconds }
+     This parameter is applicable only if 'cacheType' is 'sinkDriven'.
+     See the 'preemptionRecoveryThreshold' description.
+     Default value: 180
+    
+    *<serviceName>*preemptionRetryTime: 180
+    
+@A@G@N@N@180@PREEMPTION RETRY TIME@	*"${svc}"*preemptionRetryTime: 180
+    
+     maxLoadLevel:  { 1 - 65535 }
+     This parameter is applicable only if 'cacheType' is 'sinkDriven' and
+     'preemption' is set to 'srcApp'. 
+     This is the maximum load level which will be supplied by the source
+     applications. The Source Distributor uses this parameter to normalize the
+     load level value supplied by the source application to the range 0 to
+     65,535. The Source Distributor sends the normalized load level to the
+     network.
+     Default value: 65535
+    
+    *<serviceName>*maxLoadLevel: 65535
+    
+@A@G@N@R1,65535@65535@MAX. LOAD VALUE@	*"${svc}"*maxLoadLevel: 65535
+    
+     normalizedLoadLevelThresholdForConcurrentRequests:  { 0 - 100 }
+     This parameter is applicable only if 'cacheType' is 'sinkDriven' and
+     'preemption' is set to 'srcApp'. 
+     This parameter value is expressed as a percentage (0 to 100). The SSL
+     infrastructure calculates the actual load level threshold by multiplying
+     the maximum normalized load level (65,535) by this percentage.
+     This parameter allows the SSL to distribute Open Requests for new (uncached)
+     items across multiple servers in a parallel fashion as follows:
+     a) The SSL will regard all servers having a normalized load level less than
+        or equal to this threshold value as equal for load balancing purposes.
+        That is, the SSL will route an Open Request for a new item to the server
+        within this subset having the least number of outstanding requests for
+        new items. If all the servers within this subset become blocked (which
+        means that the server's "maximum number of outstanding requests for new
+        items" limit has been reached), the SSL will stop sending Open Requests
+        for new items to the service until one of these servers unblocks.
+        (Note: If an item request is denied by a server, it will be sent to the
+        least loaded server which has not yet been tried even if this server is
+        blocked.)
+     b) If no servers have a normalized load level less than or equal to this
+        threshold value, an Open Request for a new item will be sent to the
+        absolutely least loaded server. Once this server becomes blocked, the
+        SSL will stop sending Open Requests for new items to the entire service
+        until the least loaded server unblocks. (Note: If an item request is
+        denied by this server, it will be sent to the next least loaded server
+        even if this server is blocked.)
+     Default value: 75
+    
+    *<serviceName>*normalizedLoadLevelThresholdForConcurrentRequests: 75
+    
+@A@G@N@R1,100@75@no comment@	*"${svc}"*normalizedLoadLevelThresholdForConcurrentRequests: 75
+    
+     rowsInPage:  { 1 - N }
+     This parameter is applicable only if the service provides page-based data.
+     This parameter specifies the number of rows contained in a page.
+     Default value: 25
+    
+    *<serviceName>*rowsInPage: 25
+    
+@A@G@N@N@25@MAX. ANSI PAGE ROWS@	*"${svc}"*rowsInPage: 25
+    
+     columnsInPage:  { 1 - N }
+     This parameter is applicable only if the service provides page-based data.
+     This parameter specifies the number of columns contained in a page.
+     Default value: 80
+    
+    *<serviceName>*columnsInPage: 80
+    
+@A@G@N@N@80@MAX. ANSI PAGE COLUMNS@	*"${svc}"*columnsInPage: 80
+    
+     clearScreenOnPreemption:  { Yes, No }
+     This parameter is applicable only if the service provides page-based data.
+     Indicates whether a clear screen update should be sent to the network
+     when an item is preempted.
+     Default value: No
+    
+    *<serviceName>*clearScreenOnPreemption: { Yes, No }
+    
+@A@G@S@LYes,No@No@SEND CLEAR SCREEN AFTER PREEMPTION@	*"${svc}"*clearScreenOnPreemption: No 
+    
+     clearScreenOnComFault:  { Yes, No }
+     This parameter is applicable only if the service provides page-based data.
+     Indicates whether a clear screen update should be sent to the network
+     when a communication fault occurs.
+     Default value: No
+    
+    *<serviceName>*clearScreenOnComFault: { Yes, No }
+    
+@A@G@S@LYes,No@No@SEND CLEAR SCREEN AFTER COMMS FAULT@	*"${svc}"*clearScreenOnComFault: No
+    
+     insertAction: { lowest, any, allAll, allAny }
+     Defines how the SSL infrastructure will handle an Insert request.
+     One of the following actions may be specified:
+     lowest - Send the Insert to the server having the lowest load level. If
+              multiple servers have an equally low load level, the Insert will
+              be sent to the server within this subset having the lowest node_id.
+     any    - Send the Insert to any single server. Servers will be selected to
+              receive Inserts in a round-robin fashion; load level will be
+              ignored.
+     allAll - Send the Insert to ALL source servers. An Insert acknowledgement
+              (ACK) will be sent to the sink application only if ALL servers ACK
+              the Insert. Otherwise, a negative acknowledgement (NAK) will be
+              sent to the sink application.
+     allAny - Send the Insert to ALL source servers. An Insert acknowledgement
+              (ACK) will be sent to the sink application if ANY server ACK's
+              the Insert. Otherwise, a negative acknowledgement (NAK) will be
+              sent to the sink application.
+     Default value: lowest
+    
+    *<serviceName>*insertAction: { lowest, any, allAll, allAny }
+    
+@A@G@S@Llowest,any,allAll,allAny@lowest@INSERT ROUTING@	*"${svc}"*insertAction: lowest
+    
+    
+    ---------------------------------------------------
+     Service-specific configs for Service Distributor
+    ---------------------------------------------------
+    
+     The following parameters are configured on a per-service basis.
+    
+    
+     serverId:  { 32 - 65535 }
+     Use the 'AllocateIds' tool to assign a unique serverId to each
+     service-specific component within the service_dist.
+     Note: A given serverId may not share its value with any other serviceId,
+     serverId, or keepAliveId on the network. Values 0 - 31 inclusive are
+     reserved and may not be used.
+     A given service may only be supported by one service_dist on the network.
+     Hence, there is no need to specify this keyword down to the hostname/
+     instance level.
+     Default value: NONE - THIS PARAMETER MUST BE DEFINED
+    
+    *service_dist*<serviceName>*serverId : XX
+    
+@B@G@N@N@@AUTOMATICALLY ASSIGNED@	*service_dist*"${svc}"*serverId : XX
+    
+     maxCacheExpected:  { 1 - N }
+     An estimate of the maximum number of items expected to be cached on all
+     servers combined. This value is used for hash table allocation.
+     The parameter is closely asscoiated with the maxCacheExpected configruation
+     parameter.  These parameters must be set such that the following relational
+     expression is true.
+        maxCacheExpected = WATCHLIST_LIST + 1; 
+     Default value: NONE - THIS PARAMETER MUST BE DEFINED
+    
+    *service_dist*<serviceName>*maxCacheExpected: XX
+    
+@A@G@N@N@20000@SERVICE AGGREGATE CACHE SIZE@	*service_dist*"${svc}"*maxCacheExpected: 50 
+    
+     maxOpensPerActivation:  { 1 - N }
+     The service_dist will maintain a data base of items which are waiting to
+     be opened. A module known as the "WaitingForOpen Manager" is responsible
+     for opening these items. Once the WaitingForOpen Manager is activated,
+     this parameter defines the maximum number of items which this manager
+     may process (attempt to open) before relinquishing control. (Note: When
+     the manager relinquishes control, it is re-scheduled for the next available
+     time slice if more items are waiting to be opened.)
+     Default value: 50
+    
+    *service_dist*<serviceName>*maxOpensPerActivation: 50
+    
+@R@G@N@N@50@REQUEST BATCH SIZE@	*service_dist*"${svc}"*maxOpensPerActivation: 50
+    
+     priorityCountThresholdForWaitingForOpenSorting:  { 1 - N }
+     In general, the "WaitingForOpen Manager" will process items in order of
+     decreasing priority, starting with the highest priority item in its data
+     base. For a given priority class, this data base will contain a set of
+     tables which can be directly indexed by the priority count, given that
+     the count is less than or equal to this parameter. An item having a
+     priority count greater than this parameter will be placed on an overflow
+     list associated with the table. The 'sortWaitingForOpenOverflowLists'
+     parameter will determine whether or not these lists are sorted. If the
+     overflow lists are not sorted, an item may be quickly inserted on a list,
+     however the WaitingForOpen Manager will treat all items on a given
+     overflow list as though they have equal priority. On the other hand, if
+     the overflow lists are sorted, the insert time could be significant for a
+     long list. Hence, in either case (overflowing sorting vs. non-sorting),
+     this parameter should be set such that a minimal number of items will be
+     placed on the overflow lists.
+     Default value: 16
+    
+    *service_dist*<serviceName>*priorityCountThresholdForWaitingForOpenSorting: 16
+@R@G@N@N@16@no comment @	*service_dist*"${svc}"*priorityCountThresholdForWaitingForOpenSorting: 16
+    
+    
+     sortWaitingForOpenOverflowLists:  { True, False }
+     See the 'priorityCountThresholdForWaitingForOpenSorting' description.
+     Default value: False
+    
+    *service_dist*<serviceName>*sortWaitingForOpenOverflowLists: False
+    
+@R@G@S@LTrue,False@False@no comment@	*service_dist*"${svc}"*sortWaitingForOpenOverflowLists: False
+    
+     priorityCountThresholdForPreemptionSorting:  { 1 - N }
+     This parameter is applicable only for a service having 'cacheType' =
+     'sinkDriven' and 'preemption' = 'ssl'.
+     In general, the "LoadBalancing Manager" will preempt items in order of
+     increasing priority, starting with the lowest priority item in its data
+     base. For a given priority class, this data base will contain a table
+     which can be directly indexed by the priority count, given that the
+     count is less than or equal to this parameter. An item having a
+     priority count greater than this parameter will be placed on an overflow
+     list associated with the table. These overflow lists will always be sorted.
+     Hence, the insert time could be significant for a long list. Therefore,
+     this parameter should be set such that a minimal number of items will be
+     placed on the overflow lists.
+     Default value: 32
+    
+    *service_dist*<serviceName>*priorityCountThresholdForPreemptionSorting: 32
+@R@G@N@N@32@no comment @	*service_dist*"${svc}"*priorityCountThresholdForPreemptionSorting: 32
+    
+    
+     loggingSelector:
+     This parameter is applicable only if the 'install_file_logger' parameter
+     for the 'logger' component is set to 'True'.
+     This parameter determines the level of logging to be performed for the
+     given service. One or more of the following levels may be specified:
+         *.info  - Log selected information regarding normal operation.
+         *.error - Log all errors.
+         *.debug - Log extensive information regarding normal operation.
+     If multiple levels are specified, the levels must be separated by commas.
+     Alternatively, the following value may be specified:
+         *.none - Disable all logging for the given service.
+     Default value: *.error, *.info
+    
+     NOTE: If debug logging is enabled via this parameter, the 'selector'
+           parameter for the 'logger' component must also be defined as follows:
+               *service_dist*logger*selector : *.error, *.info, *.debug
+    
+    *service_dist*<serviceName>*loggingSelector: <value> [,<value>] [,<value>]
+    
+@A@G@S@L*.error,*.info,*.debug@*.error,*.info@SERVICE LOG SELECTOR@	*service_dist*"${svc}"*loggingSelector: *.error, *.info
+

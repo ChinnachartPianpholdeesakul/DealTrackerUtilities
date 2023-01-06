@@ -1,0 +1,17 @@
+Development Product Family: MDS - API
+FTP Category: /reut/ReutersMarketDataSystem(RMDS)/Application ProgrammingInterface(API)/
+Product: SDK Classic Edition (SSL) C - API
+Release: 4.0.10
+Load Number: E1
+Load ID: ssl4.0.10.E1.devkit.win32.E-Loads
+Status: E-Loads
+Operating System: Windows
+OS Version: Windows 98, Windows 95, Windows NT 4.0 (SP3 or Higher), Windows 2000, Windows XP (Professional)
+US ECCN: EAR99
+EU ECCN: None
+CCATS: N/A
+Export Code: NL 
+Country of origin : United States 
+Released Completion date : Fri May 14 2004
+
+

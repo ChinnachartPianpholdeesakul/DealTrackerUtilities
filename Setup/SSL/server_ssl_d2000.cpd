@@ -1,0 +1,264 @@
+
+	 *******************************************************************
+	 *                  Copyright (C) 1995 Reuters,                    *
+	 *                                                                 *
+	 *   All rights reserved. Duplication or distribution prohibited   *
+	 *******************************************************************
+	
+        OVERVIEW/ FILE CONTENTS
+
+    The Configuration Parameter Definition (.cpd) file contains
+    a description of a Triarch component configuration parameters 
+    along with the keyword syntax for each parameter, and the 
+    encoded configuration specification string used by the Triarch 
+    configuration utilities.
+
+    The .cpd file serves two roles:
+
+    It is a complete description of all available configuration variables 
+    for a each component. The TRIARCH installer must read this file to 
+    find out what effect a parameter has on the component/system.
+
+    It is the input to the Triarch Configuration utilities, which use
+    the encoded information to manage the complexity in configuring the
+    component.  For example, if a "basic" configuration is performed on
+    a component, the utilities will only show the installer parameters
+    that have been defined as Basic.
+
+	After the description of each parameter a line is inserted containing a
+    control string and the actual parameter definition.
+
+    @ @ @ @ @ @  *sink_dist*keepAlive*keepAliveTimeout : 300
+
+    The control string is made up of six fields delimited by @.    
+
+    @class@scope@type@restriction@default@comment@  
+
+    An example is:
+
+    @B@SN@N@N@@AUTOMATICALLY ASSIGNED@ "${node}"*sink_dist*keepAlive*keepAliveId : XX
+
+    Note: ${node}, ${inst}, and ${svc} are used as placeholders for node name, 
+    instance, and service name, respectivelly.
+
+
+
+    THE FOLLOWING TABLE DEFINES THE POSSIBLE ENCONDING FOR EACH CONTROL FIELD.
+    
+    
+    field          Values             Description
+    ------------|------------|----------------------------------------------------
+    class       |    B       | Basic - available for basic install menu
+                |    A       | Advanced - available only in advanced menu
+                |    D       | Debug - available only via debug menu
+                |    R       | Read-only  passed to triarch.cnf unmodified
+    ------------|------------|----------------------------------------------------
+    scope       |   G        | Global - global Triarch parameter, cannot be 
+                |            | applied to a specific node.    
+                |   MN       | Modifiable to Node - normally a global parameter, 
+                |            | may be redefined to a specific node.
+                |   MI       | Modifiable to Instance- normally a global parameter,
+                |            | may be redefined to a specific instance.
+                |   SN       | Specific to Node - must always be scoped to a node.
+                |   SI       | Specific to Instance - must always be scoped to an 
+                |            | instance.
+    ------------|------------|----------------------------------------------------
+    type        |   N        | Numeric - parameter is of type numeric. Used in 
+                |            | validation  
+                |   S        | String - parameter is of type string. Used in 
+                |            | validation.
+    ------------|------------|----------------------------------------------------
+    restriction |   N        | None
+                |   Rn,m     | Range - numeric range of values
+                |   Lx,y,z   | List - An list of string values
+    ------------------------------------------------------------------------------
+    default     |            | default value assigned by development.
+    ------------------------------------------------------------------------------
+    comment     |            | comment - parameter description.
+    ------------------------------------------------------------------------------
+
+
+    This file contains a description of the server configuration parameters along
+    with the keyword syntax for each parameter. TRIARCH server developers are 
+    expected to use this file as a template for the creation of the
+    server specific configuration parameter definition file.  This file is defines
+    one infrastructure attribute of a server, the serverId.  SSL server application 
+    developers should add all server specific variables below.
+
+ FORMAT AND SYNTAX NOTES:
+
+    A list of values enclosed in curly braces '{}' indicates that one
+    and only one of the values may be specified for the given parameter.
+
+    A value enclosed in square braces '[]' is optional.
+
+    General keyword syntax:
+
+    The keyword format follows the X config format and is as follows:
+
+        <hostname>.<instance>.<serviceName>*<config_variable> : <value>
+
+    The hostname, instance, and serviceName fields are tightly bound (i.e.,
+    additional fields may NOT be inserted between these fields). Hence,
+    these fields are delimitted with a '.'. On the other hand, the
+    serviceName and config_variable fields are loosely bound (i.e.,
+    additional fields may be inserted between these fields). Hence, these
+    fields are delimitted with a '*'. The hostname and/or instance fields may
+    be replaced with a wild card value '*'. Hence, the following keyword
+    formats are possible:
+
+        <hostname>*<serviceName>*<config_variable> : <value>
+        *<instance>.<serviceName>*<config_variable> : <value>
+        *<serviceName>*<config_variable> : <value>
+
+    Note: If a parameter is applicable to the service as a whole, the
+    following format should be chosen:
+
+        *<serviceName>*<config_variable> : <value>
+
+
+
+    *******************************************************************************
+                  Common Server parameters
+    *******************************************************************************
+
+     Assignment of "serverId's" to source servers:  { XX - 65535 }
+     Use the 'AllocateIds' tool to assign a unique serverId to each source
+     server. Note: A given serverId may not share its value with any other
+     serviceId, serverId, or keepAliveId on the network. Values 0 - 31 inclusive
+     are reserved and may not be used.
+     Three alternative keyword formats are presented below. Use the one(s) most
+     suitable for your site.
+     Default value: NONE - AUTOMATICALLY ASSIGNED
+    
+    <hostname>*<serviceName>*serverId : XX
+    <hostname>.<instance>.<serviceName>*serverId : XX
+    *<instance>.<serviceName>*serverId : XX
+    
+@B@SN@N@N@@AUTOMATICALLY ASSIGNED@	"${node}"*"${svc}"*serverId : XX
+
+    *******************************************************************************
+                  SSL Server Application parameters
+    *******************************************************************************
+
+ 
+    Source server error log file.  The default is liberty.log.
+    If this parameter is not specified, messages are written to
+    standard error.
+@B@MN@S@N@d2000.errlog@Server log file@ *"${svc}"*D2000_ERRLOG: d2000.errlog
+ 
+ 
+    The above two parameters apply to the log files.  If VERSIONS is set to
+    0 then one log file of no predetermned size is used.  If VERSIONS is >0
+    then a logfile is create using the LOG_FILE name with a version number.
+    VERSIONS specifies the number of logfile versions that will be used.
+    MSG_COUNT determines how many messages will be logged to the file before
+    the next version is used.
+    The default for VERSIONS is 0 and the default for MSG_COUNT is 2000.
+@B@MN@N@N@@Number of log files@ *"${svc}"*VERSIONS: 3
+@B@MN@N@N@@Number of messages in the log file@  *"${svc}"*MSG_COUNT: 2000
+ 
+ 
+	This key is used to allocate a shared memory segment to hold the server's
+	statistics.  The shared memory values can be displayed through the Triarch
+	Source Server monitor (d2000_stats).  This parameter must be set to a value
+	since there is no default.
+@B@MN@N@N@69@Shared Memory Key@   *"${svc}"*SHM_KEY: 69 
+ 
+
+    This is used in the event the connection to the TOF and CIF Network Server,
+    COG Server or Triarch srcdbms is broken and the source server must attempt
+    to reconnect.  The default is 30 seconds.
+@A@MN@N@N@@Reconnect Interval@ *"${svc}"*RECONNECT_INTERVAL: 30
+ 
+
+    This parameter dictates the number of SSL record structures allocated by the
+    Triarch srcdbms when this source mounts, i.e., the maximum number of records
+    that can be cached by this Triarch srcdbms.  This parameter must be set to a
+    value, since there is no default.
+@B@MN@N@N@500@Maximum Cache Size@  *"${svc}"*MAX_CACHE_SIZE: 500
+
+    The flag indicates the COG functionality is disabled when set to zero, and
+    enabled when it is positive.  The default is 0.
+@B@MN@N@N@@DTF Enabled@  *"${svc}"*DTF_ENABLED: 0
+
+    This parameter refers to the host name of the system upon which the DTF
+    Server module runs.  The parameter is used by the Triarch Source Server to
+    establish an ipc channel to the DTF Server.  This parameter must be set to
+    a value when the DTF functionality is enabled, since there is no default
+    value.
+   
+    Note: The name specified as the value of this parameter must be defined as
+    a <host name> in the /etc/hosts file.  For information on defining network
+    host entries, see the Installation Guide.
+@B@MN@S@N@dtfhost@DTF Host Name@ *"${svc}"*DTF_HOST_NAME: dtfhost
+
+    This is a character string (32 byte maximum) which specifies the ipc service
+    name used to establish an ipc channel between the DTF Server and the Triarch
+    Source Server.  This parameter must be set to a value when DTF functionality
+    is enabled, since there is no default.
+   
+    Note: The name specified as the value of this parameter must be defined as
+    a <service name> in the /etc/services file. For information on defining
+    network service entries, see the Installation Guide.
+@B@MN@S@N@dtfserver@DTF Service Name@ *"${svc}"*DTF_SERVICE_NAME: dtfserver
+
+    This parameter refers to the interprocess communication transport protocol
+    used to establish an ipc channel between the DTF Server and the Triarch
+    Source Server.  This parameter will always default to tcp.
+@A@MN@S@N@@DTF Protocol@ *"${svc}"*DTF_PROT_NAME: tcp
+
+    The flag indicates the TOF/CIF functionality is disabled when set to zero,
+    and enabled when it is positive.  The default is 1.
+@B@MN@N@N@@D2000 Enabled@  *"${svc}"*D2000_ENABLED: 1
+
+    This parameter refers to the host name of the system upon which the TOF and
+    CIF Network Server module runs.  The parameter is used by the Triarch Source
+    Server to establish an ipc channel to the TOF and CIF Network Server.  This
+    parameter must be set to a value when the TOF/CIF functionality is enabled,
+    since there is no default.
+   
+    Note: The name specified as the value of this parameter must be defined as
+    a <host name> in the /etc/hosts file.  For information on defining network
+    host entries, see the Installation Guide.
+@B@MN@S@N@d2000host@D2000 Host Name@ *"${svc}"*D2000_HOST_NAME: d2000host
+
+    This is a character string (32 byte maximum) which specifies the ipc service
+    name used to establish an ipc channel between the TOF and CIF Network Server
+    and the Triarch Source Server.  This parameter must be set to a value when
+    the TOF/CIF functionality is enabled, since there is no default.
+   
+    Note: The name specified as the value of this parameter must be defined as
+    a <service name> in the /etc/services file.  For information on defining
+    network service entries, see the Installation Guide.
+@B@MN@S@N@tofcifdl@D2000 Service Name@ *"${svc}"*D2000_SERVICE_NAME: tofcifdl
+
+    This parameter refers to the interprocess communication transport protocol
+    used to establish an ipc channel between the TOF and CIF Network Server and
+    the Triarch Source Server.  This parameter will always default to tcp.
+@A@MN@S@N@@D2000 Protocol@ *"${svc}"*D2000_PROT_NAME: tcp
+
+    This is the RIC name that will be used to notify all users which new TOF
+    tickets are available for all the controllers.  This parameter must be set
+    to a value since there is no default.
+@A@MN@S@N@TOF@TOF Broadcast Ric Name@ *"${svc}"*TOF_BROADCAST_RIC: TOF
+
+    This is the RIC name that will be used to broadcast to users the latest TOF
+    ticket information for all the controllers.  This parameter must be set to
+    a value since there is no default.
+@A@MN@S@N@TICKET@Ticket Broadcast Ric Name@ *"${svc}"*TICKET_BROADCAST_RIC: TICKET
+
+    This is the RIC name that will be used to broadcast to users the CIF data.
+    This parameter must be set to a value since there is no default.
+@A@MN@S@N@CIF@CIF Broadcast Ric Name@ *"${svc}"*CIF_BROADCAST_RIC: CIF
+
+    This is the RIC name that will be used to broadcast to users the DEAL printer
+    port data.  This parameter must be set to a value since there is no default.
+   
+    Note: This is here for future expansion.
+@A@MN@S@N@DEAL@DEAL Broadcast Ric Name@ *"${svc}"*DEAL_BROADCAST_RIC: DEAL
+
+    Debug Level.  The higher the debug level, the more debug messages will
+    be written to the log.
+@D@MN@N@R0,99@@Debug Level@ *"${svc}"*DEBUGLEVEL: 0
+ 

@@ -1,0 +1,76 @@
+# This file is the IPC Routing information file (ipcroute)
+#
+# An ipcroute file is used to route:
+# 1. a SSL sink application to a Sink Distributor
+# 2. a SSL source application to a Source Database Manager
+# 3. a Source Database Manager to a Source Distributor
+#
+# An ipcroute file may also have an optional parameter. This parameter
+# specifies how long times outs are in seconds for mounts. the two time
+# outs deal with the completion of establishment of an IPC channel and
+# the round trip time of a MOUNT request and an ACK or NAK.
+# These two events are timed separately. But they may use the same time-out.
+#
+# The parameter lines is as follows (uncomment the line to activate it)
+# mount_wait_time = 10
+# mount_wait_time is the name of the parameter 
+# 10 is the number of seconds to wait.
+#
+# The default value to complete an IPC channel is 10 seconds
+# The IPC will any value supplied that is > 0
+#
+# The default value for a snk_mount() is 20. The snk_mount() call will
+# use the maximum of the parameter or 20.
+#
+# The default value for a src_mount is 90 (due to extra potential processing
+# by the srcdbms). The src_mount() call will use the maximum of the parameter
+# or 90.
+#
+#
+# SSL Inter-Process Communication is based upon a client/server model.
+# In case 1 above, the sink application is the client and the Sink Distributor
+# is the server. In case 2, the source application is the client and the
+# Source Database Manager is the server. In case 3, the Source Database
+# Manager is the client and the Source Distributor is the server.
+#
+# The format of a routing entry is:
+#
+# <service_name>.<client_type> : <client_host> : <server_host>
+#
+# where:
+#  <service_name>
+#       is the logical service name of the particular server (i.e., the Sink
+#       Distributor, Source Database Manager, or Source Distributor) to which
+#       the routing entry pertains:
+#       (1) A Sink Distributor is always started as service name 'triarch_sink'.
+#       Therefore, this service name must be either 'triarch_sink' or an alias
+#       equivalent to 'triarch_sink'.
+#       (2) The service name of a Source Database Manager is defined by the
+#       DB_SERVER_NAME parameter in the srcdbms.config file. The default name
+#       is triarch_dbms.
+#       (3) The service name of the Source Distributor is defined by the
+#       DIST_IPC_DESC parameter in the srcdbms.config file. The Source
+#       Distributor is always started as service name 'triarch_src'. Therefore,
+#       this service name must be either 'triarch_src' or an alias equivalent 
+#       to 'triarch_src'.
+#
+#  <client_type>
+#       is 'sinklib' for all SSL sink applications.
+#       is 'srclib' for both a Source Database Manager and a Source Distributor.
+#
+#  <client_host>
+#       is the hostname on which the client (i.e., the sink application, source
+#       application, or Source Database Manager) is running.
+#
+#  <server_host>
+#       is a list of hostnames on which the server (i.e., the Sink Distributor,
+#       Source Database Manager, or Source Distributor) is running.
+#       More than one server host may be specified for alternate routing at
+#       mount time. The client will attempt to mount to these machines in the
+#       order in which they are listed (left to right).
+#
+RENEGOTIATE_PORT=0
+MOUNT_WAIT_TIME=30
+Triarch_dbms.srclib:dts1:src_dist
+Triarch_dbms.srclib:dtapp1:sink_dist
+#Triarch_sink.sinklib:PC_xtra:sink_dist
